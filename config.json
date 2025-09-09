@@ -1,0 +1,22 @@
+{
+  "serial_port": "/dev/ttyUSB0",
+  "baudrate": 9600,
+  "parity": "N",
+  "stopbits": 2,
+  "bytesize": 8,
+  "timeout": 1.0,
+  "unit_id": 1,
+
+  "limits_hz": { "min": 25.0, "max": 50.0 },
+  "base_freq_hz": 50.0,
+
+  "regs": {
+    "freq_set": 4096,
+    "freq_fb": 4097,
+    "current_fb": 4099,
+    "cmd": 8192,
+    "status": 12288,
+    "fault": 32768
+  },
+  "rated_current_a": 10.0
+}

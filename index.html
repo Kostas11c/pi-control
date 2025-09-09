@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>VFD Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>VFD Control Panel</h1>
+
+  <section class="cards">
+    <article class="card">
+  <h2>Status</h2>
+  <p class="big" id="statusText">{{ status }}</p>
+  <p>Fault: <span id="faultText">{{ fault if fault not in (None,0) else "None" }}</span></p>
+  <p>Current: <strong><span id="ampsText">—</span></strong></p>
+
+  <!-- Optional simple gauge -->
+  <div class="gauge">
+    <div class="gauge-bar" id="ampsBar" style="width:0%;"></div>
+  </div>
+  <p class="small">of {{ "%.2f"|format(ratedA if ratedA is defined else 10.0) }} A rated</p>
+
+  <form method="post" action="/reset"><button type="submit">Reset Fault</button></form>
+</article>
+
+<article class="card">
+  <h2>Frequency</h2>
+  <p>
+    Commanded: <strong><span id="freqCmdText">{{ "—" if freq_cmd is not defined or freq_cmd is none else ("%.2f"|format(freq_cmd)) }}</span> Hz</strong><br>
+    Actual: <strong><span id="freqActText">{{ "—" if freq_act is not defined or freq_act is none else ("%.2f"|format(freq_act)) }}</span> Hz</strong>
+  </p>
+
+  <form method="post" action="/setfreq">
+    <input
+      id="freq"
+      name="freq"
+      type="range"
+      min="{{minHz}}"
+      max="{{maxHz}}"
+      step="0.01"
+      value="{{ '%.2f'|format(sliderHz if sliderHz is defined else maxHz) }}"
+      oninput="out.value=this.value; num.value=this.value">
+
+    <div class="row" style="margin-top:8px">
+      <output id="out">{{ '%.2f'|format(sliderHz if sliderHz is defined else maxHz) }}</output> Hz
+
+      <input
+        id="num"
+        type="number"
+        step="0.01"
+        min="{{minHz}}"
+        max="{{maxHz}}"
+        value="{{ '%.2f'|format(sliderHz if sliderHz is defined else maxHz) }}"
+        oninput="freq.value=this.value; out.value=this.value"
+        style="width:120px">
+
+      <button type="submit">Set</button>
+    </div>
+
+    <div class="hint">Limits: {{minHz}}–{{maxHz}} Hz</div>
+  </form>
+</article>
+
+<script>
+  const ratedA = {{ ratedA if ratedA is defined else 10.0 }};
+
+  async function poll() {
+    try {
+      const r = await fetch('/api/status', { cache: 'no-store' });
+      const j = await r.json();
+
+      // Update text fields only
+      const st = document.getElementById('statusText');
+      const ft = document.getElementById('faultText');
+      const fct = document.getElementById('freqCmdText');
+      const fat = document.getElementById('freqActText');
+      const at  = document.getElementById('ampsText');
+      const bar = document.getElementById('ampsBar');
+
+      if (st) st.textContent = j.status ?? 'No comm';
+      if (ft) ft.textContent = (j.fault === 0 || j.fault === null) ? 'None' : j.fault;
+      if (fct && j.freq_cmd != null) fct.textContent = (+j.freq_cmd).toFixed(2);
+      if (fat && j.freq_act != null) fat.textContent = (+j.freq_act).toFixed(2);
+
+      if (at && j.amps != null) {
+        at.textContent = (+j.amps).toFixed(2) + ' A';
+        if (bar) {
+          const pct = Math.max(0, Math.min(100, (j.amps / ratedA) * 100));
+          bar.style.width = pct.toFixed(1) + '%';
+        }
+      }
+    } catch (e) {
+      // ignore transient errors
+    }
+  }
+
+  setInterval(poll, 1000);   // 1s updates
+  window.addEventListener('load', poll);
+</script>
+
+
+
+    <article class="card">
+      <h2>Run / Stop</h2>
+      <form method="post" action="/start"><button type="submit">Start</button></form>
+      <form method="post" action="/stop"><button class="danger" type="submit">Stop</button></form>
+    </article>
+  </section>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="flash">{% for m in messages %}<li>{{ m }}</li>{% endfor %}</ul>
+    {% endif %}
+  {% endwith %}
+</body>
+</html>

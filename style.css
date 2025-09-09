@@ -1,0 +1,18 @@
+:root { --border:#ddd; --muted:#666; --danger:#d9534f; --accent:#0b63f6; }
+*{ box-sizing:border-box; }
+body { font-family: system-ui, Arial, sans-serif; margin:24px; }
+h1 { margin:0 0 18px; }
+.cards { display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); }
+.card { border:1px solid var(--border); border-radius:12px; padding:16px; }
+.row { display:flex; align-items:center; gap:12px; margin-top:8px; }
+button { padding:8px 14px; border-radius:8px; border:1px solid #999; background:#0b63f6; cursor:pointer; }
+button:hover { border-color: var(--accent); }
+button.danger { background: var(--danger); color:#fff; border-color: var(--danger); }
+.gauge { width:100%; height:10px; background:#eee; border-radius:6px; overflow:hidden; margin:6px 0; }
+.gauge-bar { height:100%; background:#0b63f6; }
+.small { color:#666; font-size:12px; }
+.big { font-size:1.25rem; margin:6px 0; }
+.hint { color:var(--muted); font-size:12px; margin-top:6px; }
+.flash { list-style:none; padding:0; margin-top:16px; }
+.flash li { background:#ffffcc; border:1px solid #e6e69c; margin:6px 0; padding:8px 12px; border-radius:8px; }
+input[type=range] { width:100%; }
