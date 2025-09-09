@@ -40,6 +40,8 @@ def read_regs(addr, count=1):
         if rr is None or rr.isError():
             return None
         return rr.registers
+    except Exception:
+        return None
     finally:
         try: c.close()
         except: pass
@@ -51,6 +53,8 @@ def write_reg(addr, value) -> bool:
             return False
         rq = c.write_register(address=addr, value=value, device_id=CFG["unit_id"])
         return (rq is not None) and (not rq.isError())
+    except Exception:
+        return False
     finally:
         try: c.close()
         except: pass
